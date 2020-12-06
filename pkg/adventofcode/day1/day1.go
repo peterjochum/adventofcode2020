@@ -42,6 +42,7 @@ func (*LinearSumFinder) FindTwoElementSum(elements []int, sum int) (int, int, er
 func (l *LinearSumFinder) FindThreeElementSum(elements []int, sum int) ([3]int, error) {
 	for idx, element := range elements {
 		remainingSum := sum - element
+		// prevent element from being summed up with itself [..] [x] [..]
 		remainingElements := append(elements[:idx], elements[idx+1:]...)
 		a, b, err := l.FindTwoElementSum(remainingElements, remainingSum)
 		if err != nil {

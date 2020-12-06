@@ -20,20 +20,26 @@ type Policy struct {
 //
 // The Policy allows to verify the Password using the IsValid method.
 type Password struct {
-	Policy   Policy
-	Password string
+	Policy      Policy
+	StrPassword string
 }
 
-// PasswordList is an alias for a collection of passwords
-type PasswordList []*Password
+// IsValid checks if the Password fulfills its policy
+func (p Password) IsValid() bool {
+	charCount := strings.Count(p.StrPassword, p.Policy.Character)
+	if charCount >= p.Policy.MinOccurrence && charCount <= p.Policy.MaxOccurrence {
+		return true
+	}
+	return false
+}
 
 // NewPasswordFromString creates a new password and its policy from a string
 //
-// Format: <MinOccurrence>-<MaxOccurrence> <Character>: <Password>
+// Format: <MinOccurrence>-<MaxOccurrence> <Character>: <StrPassword>
 // Example: 8-9 d: dddddddndd
 func NewPasswordFromString(str string) (*Password, error) {
 	// Commented ?P-Version for brevity
-	// pwdRegex := "(?P<MinOccurrence>[0-9]+)-(?P<MaxOccurrence>[0-9]+) (?P<Character>[a-z]): (?P<Password>[a-zA-Z]+)"
+	// pwdRegex := "(?P<MinOccurrence>[0-9]+)-(?P<MaxOccurrence>[0-9]+) (?P<Character>[a-z]): (?P<StrPassword>[a-zA-Z]+)"
 	pwdRegex := "([0-9]+)-([0-9]+) ([a-z]): ([a-zA-Z]+)"
 	re := regexp.MustCompile(pwdRegex)
 	parsedStrings := re.FindStringSubmatch(str)
@@ -46,21 +52,21 @@ func NewPasswordFromString(str string) (*Password, error) {
 	p.Policy.MinOccurrence, _ = strconv.Atoi(parsedStrings[1])
 	p.Policy.MaxOccurrence, _ = strconv.Atoi(parsedStrings[2])
 	p.Policy.Character = parsedStrings[3]
-	p.Password = parsedStrings[4]
+	p.StrPassword = parsedStrings[4]
 	return &p, nil
 }
 
 // NewPasswordsFromFile imports all Password strings from a file
 //
 // See NewPasswordFromString for the expected format
-func NewPasswordsFromFile(fileName string) (PasswordList, error) {
+func NewPasswordsFromFile(fileName string) ([]Password, error) {
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}
 	lines := string(data)
 
-	var passwords []*Password
+	var passwords []Password
 	for _, line := range strings.Split(lines, "\n") {
 		if line == "" {
 			continue
@@ -69,27 +75,7 @@ func NewPasswordsFromFile(fileName string) (PasswordList, error) {
 		if err != nil {
 			return nil, err
 		}
-		passwords = append(passwords, p)
+		passwords = append(passwords, *p)
 	}
 	return passwords, nil
-}
-
-// IsValid checks if the Password fulfills its policy
-func (p *Password) IsValid() bool {
-	charCount := strings.Count(p.Password, p.Policy.Character)
-	if charCount >= p.Policy.MinOccurrence && charCount <= p.Policy.MaxOccurrence {
-		return true
-	}
-	return false
-}
-
-// CountValid counts the number of valid passwords in a PasswordList
-func (pwList *PasswordList) CountValid() int {
-	count := 0
-	for _, p := range *pwList {
-		if p.IsValid() {
-			count++
-		}
-	}
-	return count
 }

@@ -6,36 +6,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func getTestPwd3() *Password {
-	return &Password{
+func getTestPwd3() Password {
+	return Password{
 		Policy: Policy{
 			MinOccurrence: 2,
 			MaxOccurrence: 9,
 			Character:     "c",
 		},
-		Password: "ccccccccc",
+		StrPassword: "ccccccccc",
 	}
 }
 
-func getTestPwd2() *Password {
-	return &Password{
+func getTestPwd2() Password {
+	return Password{
 		Policy: Policy{
 			MinOccurrence: 1,
 			MaxOccurrence: 3,
 			Character:     "b",
 		},
-		Password: "cdefg",
+		StrPassword: "cdefg",
 	}
 }
 
-func getTestPwd1() *Password {
-	return &Password{
+func getTestPwd1() Password {
+	return Password{
 		Policy: Policy{
 			MinOccurrence: 1,
 			MaxOccurrence: 3,
 			Character:     "a",
 		},
-		Password: "abcde",
+		StrPassword: "abcde",
 	}
 }
 
@@ -60,7 +60,7 @@ func TestNewPasswordFromString(t *testing.T) {
 		assert.Equal(t, 2, p.Policy.MinOccurrence)
 		assert.Equal(t, 4, p.Policy.MaxOccurrence)
 		assert.Equal(t, "p", p.Policy.Character)
-		assert.Equal(t, "vpkpp", p.Password)
+		assert.Equal(t, "vpkpp", p.StrPassword)
 	})
 
 	invalidPasswordStrings := []string{"", "abcde", "a-3 c sdfs"}
@@ -97,14 +97,14 @@ func TestNewPasswordsFromFile(t *testing.T) {
 
 func TestPasswordList_CountValid(t *testing.T) {
 	t.Run("Valid count of test passwords", func(t *testing.T) {
-		var pwdList = PasswordList{
+		var pwdList = []Validatable{
 			getTestPwd1(),
 			getTestPwd2(),
 			getTestPwd3(),
 		}
 
 		expectedValid := 2
-		actualValid := pwdList.CountValid()
+		actualValid := CountValid(pwdList)
 		if actualValid != expectedValid {
 			t.Errorf("Expected %d valid passwords, got %d", expectedValid, actualValid)
 		}
@@ -115,9 +115,12 @@ func TestPasswordList_CountValid(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		actualValid := pwdList.CountValid()
+		validatables := make([]Validatable, len(pwdList))
+		for i := range pwdList {
+			validatables[i] = pwdList[i]
+		}
+		actualValid := CountValid(validatables)
 		expectedValid := 474
 		assert.Equal(t, expectedValid, actualValid)
 	})
-
 }
