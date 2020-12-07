@@ -21,7 +21,7 @@ func PassportValid(pwdData string) bool {
 	return true
 }
 
-// TestNewPassportDataFromFile returns a []string of Passports
+// NewPassportDataFromFile returns a []string of Passports
 func NewPassportDataFromFile(fileName string) []string {
 	data, _ := ioutil.ReadFile(fileName)
 	return strings.Split(string(data), passPortSep)
