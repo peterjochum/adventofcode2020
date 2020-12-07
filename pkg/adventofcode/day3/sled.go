@@ -20,7 +20,7 @@ type Hill struct {
 
 var errInvalidCharacter = errors.New("Invalid character in input file")
 
-// ImportFromFile imports
+// NewHillFromFile creates a new hill from a datafile
 func NewHillFromFile(fileName string) (*Hill, error) {
 	var h Hill
 	data, err := ioutil.ReadFile(fileName)
