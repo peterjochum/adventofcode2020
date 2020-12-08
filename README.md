@@ -6,4 +6,3 @@ Solutions for the Advent of code puzzles 2020
 - Day 2 ✓
 - Day 3 ✓
 - Day 4 (1/2)
-
