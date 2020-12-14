@@ -1,4 +1,4 @@
-package day11
+package day10
 
 import (
 	"fmt"
@@ -11,6 +11,19 @@ import (
 type Adapter struct {
 	Joltage int
 	Used    bool
+}
+
+// String returns a formatted String representation of an Adapter
+func (a Adapter) String() string {
+	return fmt.Sprintf("%d", a.Joltage)
+}
+
+// IsCompatibleWith checks if two adapters are compatible
+func (a Adapter) IsCompatibleWith(thatAdapter Adapter) Compatibility {
+	if thatAdapter.Joltage > a.Joltage && thatAdapter.Joltage <= a.Joltage+3 {
+		return Compatible
+	}
+	return Incompatible
 }
 
 // ByJoltage compares adapters according to their Joltage
@@ -29,6 +42,26 @@ const (
 	// Incompatible adapters shall not be used - fire hazard
 	Incompatible Compatibility = false
 )
+
+// GetDifferences returns the summed differences of a complete joltage chain
+func GetDifferences(adapters []Adapter) ([4]int, error) {
+	differences := [4]int{}
+	// Initialize a virtual adapter (outlet with 0 jolts)
+	currentAdapter := Adapter{0, false}
+	for _, adapter := range adapters {
+		if currentAdapter.IsCompatibleWith(adapter) {
+			joltDiff := adapter.Joltage - currentAdapter.Joltage
+			differences[joltDiff]++
+			currentAdapter.Joltage = adapter.Joltage
+			adapter.Used = true
+		}
+	}
+	// finally always add 1 +3 difference as the device is rated 3 jolts
+	// higher than the highest adapter
+	differences[3]++
+
+	return differences, nil
+}
 
 func (c Compatibility) String() string {
 	switch c {
@@ -58,17 +91,4 @@ func GetAdapterListFromFile(fileName string) []Adapter {
 	adapters := GetAdaptersFromJoltages(joltages)
 	sort.Sort(ByJoltage(adapters))
 	return adapters
-}
-
-// IsCompatibleWith checks if two adapters are compatible
-func (a Adapter) IsCompatibleWith(thatAdapter Adapter) Compatibility {
-	if thatAdapter.Joltage > a.Joltage && thatAdapter.Joltage <= a.Joltage+3 {
-		return Compatible
-	}
-	return Incompatible
-}
-
-// String returns a formatted String representation of an Adapter
-func (a Adapter) String() string {
-	return fmt.Sprintf("Ad%dj", a.Joltage)
 }

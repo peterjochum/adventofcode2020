@@ -1,4 +1,4 @@
-package day11
+package day10
 
 import (
 	"fmt"
@@ -39,5 +39,37 @@ func TestGetAdapterListFromFile(t *testing.T) {
 	if !reflect.DeepEqual(adapters, expectedAdapters) {
 		t.Errorf("Adapters %v is not equal to expected %v",
 			adapters, expectedAdapters)
+	}
+}
+
+func TestGetDifferences(t *testing.T) {
+
+	testAdapters := GetAdaptersFromJoltages([]int{1, 4, 7})
+	exampleAdapters := GetAdapterListFromFile("example_adapters.txt")
+	example2Adapters := GetAdapterListFromFile("example_adapters_2.txt")
+	puzzleInputAdapters := GetAdapterListFromFile("adapters.txt")
+
+	differentCases := []struct {
+		name        string
+		adapters    []Adapter
+		differences [4]int
+	}{
+		{"Test", testAdapters, [...]int{0, 1, 0, 3}},
+		{"Example 1", exampleAdapters, [...]int{0, 7, 0, 5}},
+		{"Example 2", example2Adapters, [...]int{0, 22, 0, 10}},
+		{"Puzzle", puzzleInputAdapters, [...]int{0, 69, 0, 34}},
+	}
+
+	for _, testCase := range differentCases {
+		t.Run(fmt.Sprintf("Differences %s", testCase.name), func(t *testing.T) {
+			differences, err := GetDifferences(testCase.adapters)
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(differences, testCase.differences) {
+				t.Errorf("Expected %v, but go %v", testCase.differences, differences)
+			}
+		})
+
 	}
 }
