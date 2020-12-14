@@ -12,6 +12,7 @@ Find them in the [adventofcode package](pkg/adventofcode)
 - Day 4 ✓
 - Day 8 ✓
 - Day 9 ✓
+- Day 10 (1/2)
 
 ## Running
 

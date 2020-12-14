@@ -4,7 +4,16 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+type AdapterTestCase struct {
+	name        string
+	adapters    []Adapter
+	differences [4]int
+	optional    int
+}
 
 func TestAdapter_IsCompatibleWith(t *testing.T) {
 	testAdapter := Adapter{0, false}
@@ -44,21 +53,7 @@ func TestGetAdapterListFromFile(t *testing.T) {
 
 func TestGetDifferences(t *testing.T) {
 
-	testAdapters := GetAdaptersFromJoltages([]int{1, 4, 7})
-	exampleAdapters := GetAdapterListFromFile("example_adapters.txt")
-	example2Adapters := GetAdapterListFromFile("example_adapters_2.txt")
-	puzzleInputAdapters := GetAdapterListFromFile("adapters.txt")
-
-	differentCases := []struct {
-		name        string
-		adapters    []Adapter
-		differences [4]int
-	}{
-		{"Test", testAdapters, [...]int{0, 1, 0, 3}},
-		{"Example 1", exampleAdapters, [...]int{0, 7, 0, 5}},
-		{"Example 2", example2Adapters, [...]int{0, 22, 0, 10}},
-		{"Puzzle", puzzleInputAdapters, [...]int{0, 69, 0, 34}},
-	}
+	differentCases := getAdapterTestCases()
 
 	for _, testCase := range differentCases {
 		t.Run(fmt.Sprintf("Differences %s", testCase.name), func(t *testing.T) {
@@ -71,5 +66,29 @@ func TestGetDifferences(t *testing.T) {
 			}
 		})
 
+	}
+}
+
+func getAdapterTestCases() []AdapterTestCase {
+	testAdapters := GetAdaptersFromJoltages([]int{1, 4, 7})
+	exampleAdapters := GetAdapterListFromFile("example_adapters.txt")
+	example2Adapters := GetAdapterListFromFile("example_adapters_2.txt")
+	puzzleInputAdapters := GetAdapterListFromFile("adapters.txt")
+
+	differentCases := []AdapterTestCase{
+		{"Test", testAdapters, [...]int{0, 1, 0, 3}, 0},
+		{"Example 1", exampleAdapters, [...]int{0, 7, 0, 5}, 3},
+		{"Example 2", example2Adapters, [...]int{0, 22, 0, 10}, 14},
+		{"Puzzle", puzzleInputAdapters, [...]int{0, 69, 0, 34}, 44},
+	}
+	return differentCases
+}
+
+func TestCountOptionalAdapters(t *testing.T) {
+	for _, atc := range getAdapterTestCases() {
+		t.Run(fmt.Sprintf("Optional adapters in %s", atc.name), func(t *testing.T) {
+			actualOptional := CountOptionalAdapters(atc.adapters)
+			assert.Equal(t, actualOptional, atc.optional)
+		})
 	}
 }

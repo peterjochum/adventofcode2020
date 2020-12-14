@@ -92,3 +92,26 @@ func GetAdapterListFromFile(fileName string) []Adapter {
 	sort.Sort(ByJoltage(adapters))
 	return adapters
 }
+
+// CountOptionalAdapters counts how many adapters could be skipped (WIP:)
+func CountOptionalAdapters(adapters []Adapter) int {
+	optional := 0
+	outlet := Adapter{0, false}
+	deviceJoltage := adapters[len(adapters)-1].Joltage + 3
+	device := Adapter{deviceJoltage, false}
+
+	// Add the outlet and the device as start and end points
+	var completeAdapters []Adapter
+	completeAdapters = append(completeAdapters, outlet)
+	completeAdapters = append(completeAdapters, adapters...)
+	completeAdapters = append(completeAdapters, device)
+
+	// Check for every adapter if the previous and next are compatible
+	for i := 1; i < len(adapters)-1; i++ {
+		if completeAdapters[i-1].IsCompatibleWith(completeAdapters[i+1]) {
+			// I am optional
+			optional++
+		}
+	}
+	return optional
+}
